@@ -2,6 +2,9 @@
   "goerli": {
     "PoemWikiToken": {
       "address": "0x7659f27043FA6b98FE91Ddd39CfAFa78613e1fAf"
+    },
+    "Governor": {
+      "address": "0x55d9A177EabD0F7024Bce9DaFED16549B8690e6e"
     }
   }
 }

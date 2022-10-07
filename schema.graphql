@@ -36,3 +36,73 @@ type Transfer @entity {
   to: Bytes! # address
   value: BigInt! # uint256
 }
+type ContractInitialized @entity {
+  id: ID!
+  version: Int! # uint8
+}
+
+type ProposalCanceled @entity {
+  id: ID!
+  proposalId: BigInt! # uint256
+}
+
+type ProposalCreated @entity {
+  id: ID!
+  proposalId: BigInt! # uint256
+  proposer: Bytes! # address
+  targets: [Bytes!]! # address[]
+  values: [BigInt!]! # uint256[]
+  signatures: [String!]! # string[]
+  calldatas: [Bytes!]! # bytes[]
+  startBlock: BigInt! # uint256
+  endBlock: BigInt! # uint256
+  description: String! # string
+}
+
+type ProposalExecuted @entity {
+  id: ID!
+  proposalId: BigInt! # uint256
+}
+
+type ProposalThresholdSet @entity {
+  id: ID!
+  oldProposalThreshold: BigInt! # uint256
+  newProposalThreshold: BigInt! # uint256
+}
+
+type QuorumNumeratorUpdated @entity {
+  id: ID!
+  oldQuorumNumerator: BigInt! # uint256
+  newQuorumNumerator: BigInt! # uint256
+}
+
+type VoteCast @entity {
+  id: ID!
+  voter: Bytes! # address
+  proposalId: BigInt! # uint256
+  support: Int! # uint8
+  weight: BigInt! # uint256
+  reason: String! # string
+}
+
+type VoteCastWithParams @entity {
+  id: ID!
+  voter: Bytes! # address
+  proposalId: BigInt! # uint256
+  support: Int! # uint8
+  weight: BigInt! # uint256
+  reason: String! # string
+  params: Bytes! # bytes
+}
+
+type VotingDelaySet @entity {
+  id: ID!
+  oldVotingDelay: BigInt! # uint256
+  newVotingDelay: BigInt! # uint256
+}
+
+type VotingPeriodSet @entity {
+  id: ID!
+  oldVotingPeriod: BigInt! # uint256
+  newVotingPeriod: BigInt! # uint256
+}

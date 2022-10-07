@@ -1,4 +1,4 @@
-specVersion: 0.0.1
+specVersion: 0.0.4
 schema:
   file: ./schema.graphql
 dataSources:
@@ -10,7 +10,7 @@ dataSources:
       abi: PoemWikiToken
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Approval
@@ -36,3 +36,49 @@ dataSources:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
       file: ./src/poem-wiki-token.ts
+  - kind: ethereum
+    name: Governor
+    network: goerli
+    source:
+      address: "0x55d9A177EabD0F7024Bce9DaFED16549B8690e6e"
+      abi: Governor
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - ContractInitialized
+        - ProposalCanceled
+        - ProposalCreated
+        - ProposalExecuted
+        - ProposalThresholdSet
+        - QuorumNumeratorUpdated
+        - VoteCast
+        - VoteCastWithParams
+        - VotingDelaySet
+        - VotingPeriodSet
+      abis:
+        - name: Governor
+          file: ./abis/Governor.json
+      eventHandlers:
+        - event: ContractInitialized(uint8)
+          handler: handleContractInitialized
+        - event: ProposalCanceled(uint256)
+          handler: handleProposalCanceled
+        - event: ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)
+          handler: handleProposalCreated
+        - event: ProposalExecuted(uint256)
+          handler: handleProposalExecuted
+        - event: ProposalThresholdSet(uint256,uint256)
+          handler: handleProposalThresholdSet
+        - event: QuorumNumeratorUpdated(uint256,uint256)
+          handler: handleQuorumNumeratorUpdated
+        - event: VoteCast(indexed address,uint256,uint8,uint256,string)
+          handler: handleVoteCast
+        - event: VoteCastWithParams(indexed address,uint256,uint8,uint256,string,bytes)
+          handler: handleVoteCastWithParams
+        - event: VotingDelaySet(uint256,uint256)
+          handler: handleVotingDelaySet
+        - event: VotingPeriodSet(uint256,uint256)
+          handler: handleVotingPeriodSet
+      file: ./src/governor.ts
