@@ -10,16 +10,16 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
-export class ContractInitialized extends ethereum.Event {
-  get params(): ContractInitialized__Params {
-    return new ContractInitialized__Params(this);
+export class GovernorInitialized extends ethereum.Event {
+  get params(): GovernorInitialized__Params {
+    return new GovernorInitialized__Params(this);
   }
 }
 
-export class ContractInitialized__Params {
-  _event: ContractInitialized;
+export class GovernorInitialized__Params {
+  _event: GovernorInitialized;
 
-  constructor(event: ContractInitialized) {
+  constructor(event: GovernorInitialized) {
     this._event = event;
   }
 

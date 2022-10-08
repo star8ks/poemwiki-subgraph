@@ -1,5 +1,5 @@
 import {
-  ContractInitialized as ContractInitializedEvent,
+  GovernorInitialized as GovernorInitializedEvent,
   ProposalCanceled as ProposalCanceledEvent,
   ProposalCreated as ProposalCreatedEvent,
   ProposalExecuted as ProposalExecutedEvent,
@@ -9,9 +9,9 @@ import {
   VoteCastWithParams as VoteCastWithParamsEvent,
   VotingDelaySet as VotingDelaySetEvent,
   VotingPeriodSet as VotingPeriodSetEvent
-} from "../generated/Contract/Contract"
+} from "../generated/Governor/Governor"
 import {
-  ContractInitialized,
+  GovernorInitialized,
   ProposalCanceled,
   ProposalCreated,
   ProposalExecuted,
@@ -23,10 +23,10 @@ import {
   VotingPeriodSet
 } from "../generated/schema"
 
-export function handleContractInitialized(
-  event: ContractInitializedEvent
+export function handleGovernorInitialized(
+  event: GovernorInitializedEvent
 ): void {
-  let entity = new ContractInitialized(
+  let entity = new GovernorInitialized(
     event.transaction.hash.toHex() + "-" + event.logIndex.toString()
   )
   entity.version = event.params.version

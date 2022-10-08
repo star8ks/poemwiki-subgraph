@@ -47,7 +47,7 @@ dataSources:
       apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
-        - ContractInitialized
+        - GovernorInitialized
         - ProposalCanceled
         - ProposalCreated
         - ProposalExecuted
@@ -61,8 +61,8 @@ dataSources:
         - name: Governor
           file: ./abis/Governor.json
       eventHandlers:
-        - event: ContractInitialized(uint8)
-          handler: handleContractInitialized
+        - event: GovernorInitialized(uint8)
+          handler: handleGovernorInitialized
         - event: ProposalCanceled(uint256)
           handler: handleProposalCanceled
         - event: ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)

@@ -36,7 +36,7 @@ type Transfer @entity {
   to: Bytes! # address
   value: BigInt! # uint256
 }
-type ContractInitialized @entity {
+type GovernorInitialized @entity {
   id: ID!
   version: Int! # uint8
 }

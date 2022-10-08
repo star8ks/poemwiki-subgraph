@@ -1,7 +1,7 @@
 import { newMockEvent } from "matchstick-as"
 import { ethereum, BigInt, Address, Bytes } from "@graphprotocol/graph-ts"
 import {
-  ContractInitialized,
+  GovernorInitialized,
   ProposalCanceled,
   ProposalCreated,
   ProposalExecuted,
@@ -11,23 +11,23 @@ import {
   VoteCastWithParams,
   VotingDelaySet,
   VotingPeriodSet
-} from "../generated/Contract/Contract"
+} from "../generated/Governor/Governor"
 
-export function createContractInitializedEvent(
+export function createGovernorInitializedEvent(
   version: i32
-): ContractInitialized {
-  let contractInitializedEvent = changetype<ContractInitialized>(newMockEvent())
+): GovernorInitialized {
+  let governorInitializedEvent = changetype<GovernorInitialized>(newMockEvent())
 
-  contractInitializedEvent.parameters = new Array()
+  governorInitializedEvent.parameters = new Array()
 
-  contractInitializedEvent.parameters.push(
+  governorInitializedEvent.parameters.push(
     new ethereum.EventParam(
       "version",
       ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(version))
     )
   )
 
-  return contractInitializedEvent
+  return governorInitializedEvent
 }
 
 export function createProposalCanceledEvent(

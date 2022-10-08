@@ -7,10 +7,10 @@ import {
   afterAll
 } from "matchstick-as/assembly/index"
 import { BigInt, Address, Bytes } from "@graphprotocol/graph-ts"
-import { ContractInitialized } from "../generated/schema"
-import { ContractInitialized as ContractInitializedEvent } from "../generated/Contract/Contract"
-import { handleContractInitialized } from "../src/contract"
-import { createContractInitializedEvent } from "./contract-utils"
+import { GovernorInitialized } from "../generated/schema"
+import { GovernorInitialized as GovernorInitializedEvent } from "../generated/Governor/Governor"
+import { handleGovernorInitialized } from "../src/governor"
+import { createGovernorInitializedEvent } from "./governor-utils"
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -18,8 +18,8 @@ import { createContractInitializedEvent } from "./contract-utils"
 describe("Describe entity assertions", () => {
   beforeAll(() => {
     let version = 123
-    let newContractInitializedEvent = createContractInitializedEvent(version)
-    handleContractInitialized(newContractInitializedEvent)
+    let newGovernorInitializedEvent = createGovernorInitializedEvent(version)
+    handleGovernorInitialized(newGovernorInitializedEvent)
   })
 
   afterAll(() => {
@@ -29,12 +29,12 @@ describe("Describe entity assertions", () => {
   // For more test scenarios, see:
   // https://thegraph.com/docs/en/developer/matchstick/#write-a-unit-test
 
-  test("ContractInitialized created and stored", () => {
-    assert.entityCount("ContractInitialized", 1)
+  test("GovernorInitialized created and stored", () => {
+    assert.entityCount("GovernorInitialized", 1)
 
     // 0xa16081f360e3847006db660bae1c6d1b2e17ec2a is the default address used in newMockEvent() function
     assert.fieldEquals(
-      "ContractInitialized",
+      "GovernorInitialized",
       "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
       "version",
       "123"

@@ -10,7 +10,7 @@
         "type": "uint8"
       }
     ],
-    "name": "ContractInitialized",
+    "name": "GovernorInitialized",
     "type": "event"
   },
   {

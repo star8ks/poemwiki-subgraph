@@ -342,7 +342,7 @@ export class Transfer extends Entity {
   }
 }
 
-export class ContractInitialized extends Entity {
+export class GovernorInitialized extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -350,19 +350,19 @@ export class ContractInitialized extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save ContractInitialized entity without an ID");
+    assert(id != null, "Cannot save GovernorInitialized entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.STRING,
-        `Entities of type ContractInitialized must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+        `Entities of type GovernorInitialized must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
       );
-      store.set("ContractInitialized", id.toString(), this);
+      store.set("GovernorInitialized", id.toString(), this);
     }
   }
 
-  static load(id: string): ContractInitialized | null {
-    return changetype<ContractInitialized | null>(
-      store.get("ContractInitialized", id)
+  static load(id: string): GovernorInitialized | null {
+    return changetype<GovernorInitialized | null>(
+      store.get("GovernorInitialized", id)
     );
   }
 
