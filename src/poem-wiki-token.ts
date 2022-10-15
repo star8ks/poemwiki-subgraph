@@ -1,69 +1,50 @@
+import { Bytes } from '@graphprotocol/graph-ts'
 import {
   Approval as ApprovalEvent,
   DelegateChanged as DelegateChangedEvent,
   DelegateVotesChanged as DelegateVotesChangedEvent,
-  Initialized as InitializedEvent,
   OwnershipTransferred as OwnershipTransferredEvent,
-  Transfer as TransferEvent
+  Transfer as TransferEvent,
+  PoemWikiToken as TokenContract
 } from "../generated/PoemWikiToken/PoemWikiToken"
 import {
-  Approval,
-  DelegateChanged,
-  DelegateVotesChanged,
-  Initialized,
-  OwnershipTransferred,
-  Transfer
+  Transfer,
+  Member
 } from "../generated/schema"
 
-export function handleApproval(event: ApprovalEvent): void {
-  let entity = new Approval(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.owner = event.params.owner
-  entity.spender = event.params.spender
-  entity.value = event.params.value
-  entity.save()
-}
-
 export function handleDelegateChanged(event: DelegateChangedEvent): void {
-  let entity = new DelegateChanged(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.delegator = event.params.delegator
-  entity.fromDelegate = event.params.fromDelegate
-  entity.toDelegate = event.params.toDelegate
-  entity.save()
+  let tokenContract = TokenContract.bind(event.address)
+  const memberAddress = event.params.delegator
+  const memberId = Bytes.fromHexString(event.params.delegator.toHex())
+  let member = Member.load(memberId)
+
+  if (!member) {
+    member = new Member(memberId)
+    member.address = memberAddress.toHex()
+    member.balance = tokenContract.balanceOf(memberAddress)
+    member.delegateBalance = tokenContract.getVotes(memberAddress)
+  }
+  member.delegate = event.params.toDelegate
+  member.save()
 }
 
 export function handleDelegateVotesChanged(
   event: DelegateVotesChangedEvent
 ): void {
-  let entity = new DelegateVotesChanged(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.delegate = event.params.delegate
-  entity.previousBalance = event.params.previousBalance
-  entity.newBalance = event.params.newBalance
-  entity.save()
-}
+  let tokenContract = TokenContract.bind(event.address)
+  const memberAddress = event.params.delegate
+  const memberId = Bytes.fromHexString(memberAddress.toHex())
+  let member = Member.load(memberId)
 
-export function handleInitialized(event: InitializedEvent): void {
-  let entity = new Initialized(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.version = event.params.version
-  entity.save()
-}
+  if (!member) {
+    member = new Member(memberId)
+    member.address = memberAddress.toHex()
+    member.balance = tokenContract.balanceOf(memberAddress)
+    member.delegate = tokenContract.delegates(memberAddress)
+  }
 
-export function handleOwnershipTransferred(
-  event: OwnershipTransferredEvent
-): void {
-  let entity = new OwnershipTransferred(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.previousOwner = event.params.previousOwner
-  entity.newOwner = event.params.newOwner
-  entity.save()
+  member.delegateBalance = event.params.newBalance
+  member.save()
 }
 
 export function handleTransfer(event: TransferEvent): void {
@@ -74,4 +55,19 @@ export function handleTransfer(event: TransferEvent): void {
   entity.to = event.params.to
   entity.value = event.params.value
   entity.save()
+
+  let tokenContract = TokenContract.bind(event.address)
+  const memberAddress = event.params.to
+  const memberId = Bytes.fromHexString(memberAddress.toHex())
+
+  let member = Member.load(memberId)
+  if (!member) {
+    member = new Member(memberId)
+    member.address = memberAddress.toHex()
+    member.delegate = tokenContract.delegates(memberAddress)
+  }
+
+  member.balance = tokenContract.balanceOf(memberAddress)
+  member.delegateBalance = tokenContract.getVotes(memberAddress)
+  member.save()
 }

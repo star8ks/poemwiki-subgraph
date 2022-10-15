@@ -1,55 +1,28 @@
-type Approval @entity {
-  id: ID!
-  owner: Bytes! # address
-  spender: Bytes! # address
+type Transfer @entity(immutable: true) {
+  id: String!
+  from: Member!
+  to: Member!
   value: BigInt! # uint256
 }
 
-type DelegateChanged @entity {
-  id: ID!
-  delegator: Bytes! # address
-  fromDelegate: Bytes! # address
-  toDelegate: Bytes! # address
-}
+# type MintAndApprove @entity {
+#   id: String!
+#   spender: Bytes! # address
+#   amount: BigInt! # uint256
+# }
 
-type DelegateVotesChanged @entity {
-  id: ID!
+type Member @entity {
+  id: Bytes! # address
+  address: String! # address
+  balance: BigInt! # uint256
+  delegateBalance: BigInt! # uint256
   delegate: Bytes! # address
-  previousBalance: BigInt! # uint256
-  newBalance: BigInt! # uint256
 }
 
-type Initialized @entity {
-  id: ID!
-  version: Int! # uint8
-}
-
-type OwnershipTransferred @entity {
-  id: ID!
-  previousOwner: Bytes! # address
-  newOwner: Bytes! # address
-}
-
-type Transfer @entity {
-  id: ID!
-  from: Bytes! # address
-  to: Bytes! # address
-  value: BigInt! # uint256
-}
-type GovernorInitialized @entity {
-  id: ID!
-  version: Int! # uint8
-}
-
-type ProposalCanceled @entity {
-  id: ID!
+type Proposal @entity {
+  id: Bytes!
   proposalId: BigInt! # uint256
-}
-
-type ProposalCreated @entity {
-  id: ID!
-  proposalId: BigInt! # uint256
-  proposer: Bytes! # address
+  proposer: Member!
   targets: [Bytes!]! # address[]
   values: [BigInt!]! # uint256[]
   signatures: [String!]! # string[]
@@ -57,52 +30,44 @@ type ProposalCreated @entity {
   startBlock: BigInt! # uint256
   endBlock: BigInt! # uint256
   description: String! # string
+  canceled: Boolean! # bool
+  executed: Boolean! # bool
+  voteCast: [VoteCast!]! @derivedFrom(field: "proposal")
 }
 
-type ProposalExecuted @entity {
-  id: ID!
-  proposalId: BigInt! # uint256
+enum ProposalActivityType {
+  CREATE
+  CANCEL
+  EXECUTE
+}
+type ProposalActivity @entity {
+  id: String!
+  activity: ProposalActivityType!
+  member: Member!
+  proposal: Proposal!
 }
 
-type ProposalThresholdSet @entity {
-  id: ID!
-  oldProposalThreshold: BigInt! # uint256
-  newProposalThreshold: BigInt! # uint256
+enum GovernorSettingActivityType {
+  ProposalThresholdSet
+  QuorumNumeratorUpdated
+  VotingDelaySet
+  VotingPeriodSet
 }
-
-type QuorumNumeratorUpdated @entity {
-  id: ID!
-  oldQuorumNumerator: BigInt! # uint256
-  newQuorumNumerator: BigInt! # uint256
+type GovernorSettingActivity @entity {
+  id: String!
+  activity: GovernorSettingActivityType!
+  member: Member!
+  oldValue: BigInt!
+  newValue: BigInt!
 }
 
 type VoteCast @entity {
-  id: ID!
-  voter: Bytes! # address
+  id: String!
+  voter: Member! # address
   proposalId: BigInt! # uint256
   support: Int! # uint8
   weight: BigInt! # uint256
   reason: String! # string
-}
-
-type VoteCastWithParams @entity {
-  id: ID!
-  voter: Bytes! # address
-  proposalId: BigInt! # uint256
-  support: Int! # uint8
-  weight: BigInt! # uint256
-  reason: String! # string
-  params: Bytes! # bytes
-}
-
-type VotingDelaySet @entity {
-  id: ID!
-  oldVotingDelay: BigInt! # uint256
-  newVotingDelay: BigInt! # uint256
-}
-
-type VotingPeriodSet @entity {
-  id: ID!
-  oldVotingPeriod: BigInt! # uint256
-  newVotingPeriod: BigInt! # uint256
+  params: Bytes # bytes
+  proposal: Proposal!
 }

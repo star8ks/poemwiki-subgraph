@@ -8,33 +8,27 @@ dataSources:
     source:
       address: "0x7659f27043FA6b98FE91Ddd39CfAFa78613e1fAf"
       abi: PoemWikiToken
+      startBlock: 7638840
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
-        - Approval
-        - DelegateChanged
-        - DelegateVotesChanged
-        - Initialized
-        - OwnershipTransferred
         - Transfer
+        - Member
+        # - MintAndApprove
       abis:
         - name: PoemWikiToken
           file: ./abis/PoemWikiToken.json
       eventHandlers:
-        - event: Approval(indexed address,indexed address,uint256)
-          handler: handleApproval
         - event: DelegateChanged(indexed address,indexed address,indexed address)
           handler: handleDelegateChanged
         - event: DelegateVotesChanged(indexed address,uint256,uint256)
           handler: handleDelegateVotesChanged
-        - event: Initialized(uint8)
-          handler: handleInitialized
-        - event: OwnershipTransferred(indexed address,indexed address)
-          handler: handleOwnershipTransferred
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
+        # - event: MintAndApprove(indexed address,uint256)
+        #   handler: handleMintAndApprove
       file: ./src/poem-wiki-token.ts
   - kind: ethereum
     name: Governor
@@ -42,27 +36,20 @@ dataSources:
     source:
       address: "0x55d9A177EabD0F7024Bce9DaFED16549B8690e6e"
       abi: Governor
+      startBlock: 7638842
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
-        - GovernorInitialized
-        - ProposalCanceled
-        - ProposalCreated
-        - ProposalExecuted
-        - ProposalThresholdSet
-        - QuorumNumeratorUpdated
+        - Proposal
         - VoteCast
-        - VoteCastWithParams
-        - VotingDelaySet
-        - VotingPeriodSet
+        - ProposalActivity
+        - GovernorSettingActivity
       abis:
         - name: Governor
           file: ./abis/Governor.json
       eventHandlers:
-        - event: GovernorInitialized(uint8)
-          handler: handleGovernorInitialized
         - event: ProposalCanceled(uint256)
           handler: handleProposalCanceled
         - event: ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)

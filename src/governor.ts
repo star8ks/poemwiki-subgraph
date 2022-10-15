@@ -1,5 +1,5 @@
+import { BigInt, Bytes } from '@graphprotocol/graph-ts'
 import {
-  GovernorInitialized as GovernorInitializedEvent,
   ProposalCanceled as ProposalCanceledEvent,
   ProposalCreated as ProposalCreatedEvent,
   ProposalExecuted as ProposalExecutedEvent,
@@ -11,43 +11,46 @@ import {
   VotingPeriodSet as VotingPeriodSetEvent
 } from "../generated/Governor/Governor"
 import {
-  GovernorInitialized,
-  ProposalCanceled,
-  ProposalCreated,
-  ProposalExecuted,
-  ProposalThresholdSet,
-  QuorumNumeratorUpdated,
-  VoteCast,
-  VoteCastWithParams,
-  VotingDelaySet,
-  VotingPeriodSet
+  Proposal,
+  ProposalActivity,
+  GovernorSettingActivity,
+  VoteCast
 } from "../generated/schema"
 
-export function handleGovernorInitialized(
-  event: GovernorInitializedEvent
-): void {
-  let entity = new GovernorInitialized(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.version = event.params.version
-  entity.save()
+// const ProposalActivityType = {
+//   CREATE: 'CREATE',
+//   CANCEL: 'CANCEL',
+//   EXECUTE: 'EXECUTE'
+// }
+function saveProposalActivity(id: string, activityType: string, proposalId: BigInt, member: Bytes): void {
+  let activity = new ProposalActivity(id)
+  activity.proposal = Bytes.fromHexString(proposalId.toHexString())
+  activity.activity = activityType
+  activity.member = member
+  activity.save()
 }
 
-export function handleProposalCanceled(event: ProposalCanceledEvent): void {
-  let entity = new ProposalCanceled(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.proposalId = event.params.proposalId
-  entity.save()
+// const GovernorSettingActivityType = {
+//   ProposalThresholdSet: 'ProposalThresholdSet',
+//   QuorumNumeratorUpdated: 'QuorumNumeratorUpdated',
+//   VotingDelaySet: 'VotingDelaySet',
+//   VotingPeriodSet: 'VotingPeriodSet'
+// }
+function saveGovernorActivity(id: string, activityType: string, member: Bytes, oldValue: BigInt, newValue: BigInt): void {
+  let activity = new GovernorSettingActivity(id)
+  activity.activity = activityType
+  activity.member = member
+  activity.oldValue = oldValue
+  activity.newValue = newValue
+  activity.save()
 }
 
 export function handleProposalCreated(event: ProposalCreatedEvent): void {
-  let entity = new ProposalCreated(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
+  const id = Bytes.fromHexString(event.params.proposalId.toHexString())
+  let entity = new Proposal(id)
   entity.proposalId = event.params.proposalId
   entity.proposer = event.params.proposer
-  entity.targets = event.params.targets
+  entity.targets = event.params.targets.map<Bytes>(target => Bytes.fromHexString(target.toHexString()))
   entity.values = event.params.values
   entity.signatures = event.params.signatures
   entity.calldatas = event.params.calldatas
@@ -55,36 +58,75 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   entity.endBlock = event.params.endBlock
   entity.description = event.params.description
   entity.save()
+
+  saveProposalActivity(
+    event.transaction.hash.toHex() + "-" + event.logIndex.toString(),
+    'CREATE',
+    event.params.proposalId,
+    event.transaction.from
+  )
+}
+
+export function handleProposalCanceled(event: ProposalCanceledEvent): void {
+  saveProposalActivity(
+    event.transaction.hash.toHex() + "-" + event.logIndex.toString(),
+    'CANCEL',
+    event.params.proposalId,
+    event.transaction.from
+  )
 }
 
 export function handleProposalExecuted(event: ProposalExecutedEvent): void {
-  let entity = new ProposalExecuted(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  saveProposalActivity(
+    event.transaction.hash.toHex() + "-" + event.logIndex.toString(),
+    'EXECUTE',
+    event.params.proposalId,
+    event.transaction.from
   )
-  entity.proposalId = event.params.proposalId
-  entity.save()
 }
 
 export function handleProposalThresholdSet(
   event: ProposalThresholdSetEvent
 ): void {
-  let entity = new ProposalThresholdSet(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  saveGovernorActivity(
+    event.transaction.hash.toHex() + "-" + event.logIndex.toString(),
+    'ProposalThresholdSet',
+    event.transaction.from,
+    event.params.oldProposalThreshold,
+    event.params.newProposalThreshold
   )
-  entity.oldProposalThreshold = event.params.oldProposalThreshold
-  entity.newProposalThreshold = event.params.newProposalThreshold
-  entity.save()
 }
 
 export function handleQuorumNumeratorUpdated(
   event: QuorumNumeratorUpdatedEvent
 ): void {
-  let entity = new QuorumNumeratorUpdated(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  saveGovernorActivity(
+    event.transaction.hash.toHex() + "-" + event.logIndex.toString(),
+    'QuorumNumeratorUpdated',
+    event.transaction.from,
+    event.params.oldQuorumNumerator,
+    event.params.newQuorumNumerator
   )
-  entity.oldQuorumNumerator = event.params.oldQuorumNumerator
-  entity.newQuorumNumerator = event.params.newQuorumNumerator
-  entity.save()
+}
+
+export function handleVotingDelaySet(event: VotingDelaySetEvent): void {
+  saveGovernorActivity(
+    event.transaction.hash.toHex() + "-" + event.logIndex.toString(),
+    'VotingDelaySet',
+    event.transaction.from,
+    event.params.oldVotingDelay,
+    event.params.newVotingDelay
+  )
+}
+
+export function handleVotingPeriodSet(event: VotingPeriodSetEvent): void {
+  saveGovernorActivity(
+    event.transaction.hash.toHex() + "-" + event.logIndex.toString(),
+    'VotingPeriodSet',
+    event.transaction.from,
+    event.params.oldVotingPeriod,
+    event.params.newVotingPeriod
+  )
 }
 
 export function handleVoteCast(event: VoteCastEvent): void {
@@ -96,11 +138,12 @@ export function handleVoteCast(event: VoteCastEvent): void {
   entity.support = event.params.support
   entity.weight = event.params.weight
   entity.reason = event.params.reason
+  entity.proposal = Bytes.fromHexString(event.params.proposalId.toHexString())
   entity.save()
 }
 
 export function handleVoteCastWithParams(event: VoteCastWithParamsEvent): void {
-  let entity = new VoteCastWithParams(
+  let entity = new VoteCast(
     event.transaction.hash.toHex() + "-" + event.logIndex.toString()
   )
   entity.voter = event.params.voter
@@ -109,23 +152,6 @@ export function handleVoteCastWithParams(event: VoteCastWithParamsEvent): void {
   entity.weight = event.params.weight
   entity.reason = event.params.reason
   entity.params = event.params.params
-  entity.save()
-}
-
-export function handleVotingDelaySet(event: VotingDelaySetEvent): void {
-  let entity = new VotingDelaySet(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.oldVotingDelay = event.params.oldVotingDelay
-  entity.newVotingDelay = event.params.newVotingDelay
-  entity.save()
-}
-
-export function handleVotingPeriodSet(event: VotingPeriodSetEvent): void {
-  let entity = new VotingPeriodSet(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.oldVotingPeriod = event.params.oldVotingPeriod
-  entity.newVotingPeriod = event.params.newVotingPeriod
+  entity.proposal = Bytes.fromHexString(event.params.proposalId.toHexString())
   entity.save()
 }
