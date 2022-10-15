@@ -1,4 +1,4 @@
-import { BigInt, Bytes } from '@graphprotocol/graph-ts'
+import { BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import {
   ProposalCanceled as ProposalCanceledEvent,
   ProposalCreated as ProposalCreatedEvent,
@@ -22,11 +22,14 @@ import {
 //   CANCEL: 'CANCEL',
 //   EXECUTE: 'EXECUTE'
 // }
-function saveProposalActivity(id: string, activityType: string, proposalId: BigInt, member: Bytes): void {
+function saveProposalActivity(id: string, activityType: string,
+  proposalId: BigInt, member: Bytes, block: ethereum.Block): void {
   let activity = new ProposalActivity(id)
   activity.proposal = Bytes.fromHexString(proposalId.toHexString())
   activity.activity = activityType
   activity.member = member
+  activity.block = block.number
+  activity.createdAt = block.timestamp
   activity.save()
 }
 
@@ -36,34 +39,43 @@ function saveProposalActivity(id: string, activityType: string, proposalId: BigI
 //   VotingDelaySet: 'VotingDelaySet',
 //   VotingPeriodSet: 'VotingPeriodSet'
 // }
-function saveGovernorActivity(id: string, activityType: string, member: Bytes, oldValue: BigInt, newValue: BigInt): void {
+function saveGovernorActivity(id: string, activityType: string, member: Bytes,
+  oldValue: BigInt, newValue: BigInt, block: ethereum.Block): void {
   let activity = new GovernorSettingActivity(id)
   activity.activity = activityType
   activity.member = member
   activity.oldValue = oldValue
   activity.newValue = newValue
+  activity.block = block.number
+  activity.createdAt = block.timestamp
   activity.save()
 }
 
 export function handleProposalCreated(event: ProposalCreatedEvent): void {
   const id = Bytes.fromHexString(event.params.proposalId.toHexString())
-  let entity = new Proposal(id)
-  entity.proposalId = event.params.proposalId
-  entity.proposer = event.params.proposer
-  entity.targets = event.params.targets.map<Bytes>(target => Bytes.fromHexString(target.toHexString()))
-  entity.values = event.params.values
-  entity.signatures = event.params.signatures
-  entity.calldatas = event.params.calldatas
-  entity.startBlock = event.params.startBlock
-  entity.endBlock = event.params.endBlock
-  entity.description = event.params.description
-  entity.save()
+  let proposal = new Proposal(id)
+  proposal.proposalId = event.params.proposalId
+  proposal.proposer = event.params.proposer
+  proposal.targets = event.params.targets.map<Bytes>(target => Bytes.fromHexString(target.toHexString()))
+  proposal.values = event.params.values
+  proposal.signatures = event.params.signatures
+  proposal.calldatas = event.params.calldatas
+  proposal.startBlock = event.params.startBlock
+  proposal.endBlock = event.params.endBlock
+  proposal.description = event.params.description
+  proposal.canceled = false
+  proposal.executed = false
+  proposal.block = event.block.number
+  proposal.createdAt = event.block.timestamp
+  proposal.updatedAt = event.block.timestamp
+  proposal.save()
 
   saveProposalActivity(
     event.transaction.hash.toHex() + "-" + event.logIndex.toString(),
     'CREATE',
     event.params.proposalId,
-    event.transaction.from
+    event.transaction.from,
+    event.block
   )
 }
 
@@ -72,8 +84,18 @@ export function handleProposalCanceled(event: ProposalCanceledEvent): void {
     event.transaction.hash.toHex() + "-" + event.logIndex.toString(),
     'CANCEL',
     event.params.proposalId,
-    event.transaction.from
+    event.transaction.from,
+    event.block
   )
+
+  const proposal = Proposal.load(Bytes.fromHexString(event.params.proposalId.toHexString()))
+  if (proposal) {
+    proposal.canceled = true
+    proposal.updatedAt = event.block.timestamp
+    proposal.save()
+  } else {
+    log.error("ProposalCanceled event for unknown proposal {}", [event.params.proposalId.toHexString()])
+  }
 }
 
 export function handleProposalExecuted(event: ProposalExecutedEvent): void {
@@ -81,8 +103,18 @@ export function handleProposalExecuted(event: ProposalExecutedEvent): void {
     event.transaction.hash.toHex() + "-" + event.logIndex.toString(),
     'EXECUTE',
     event.params.proposalId,
-    event.transaction.from
+    event.transaction.from,
+    event.block
   )
+
+  const proposal = Proposal.load(Bytes.fromHexString(event.params.proposalId.toHexString()))
+  if (proposal) {
+    proposal.executed = true
+    proposal.updatedAt = event.block.timestamp
+    proposal.save()
+  } else {
+    log.error("ProposalCanceled event for unknown proposal {}", [event.params.proposalId.toHexString()])
+  }
 }
 
 export function handleProposalThresholdSet(
@@ -93,7 +125,8 @@ export function handleProposalThresholdSet(
     'ProposalThresholdSet',
     event.transaction.from,
     event.params.oldProposalThreshold,
-    event.params.newProposalThreshold
+    event.params.newProposalThreshold,
+    event.block
   )
 }
 
@@ -105,7 +138,8 @@ export function handleQuorumNumeratorUpdated(
     'QuorumNumeratorUpdated',
     event.transaction.from,
     event.params.oldQuorumNumerator,
-    event.params.newQuorumNumerator
+    event.params.newQuorumNumerator,
+    event.block
   )
 }
 
@@ -115,7 +149,8 @@ export function handleVotingDelaySet(event: VotingDelaySetEvent): void {
     'VotingDelaySet',
     event.transaction.from,
     event.params.oldVotingDelay,
-    event.params.newVotingDelay
+    event.params.newVotingDelay,
+    event.block
   )
 }
 
@@ -125,7 +160,8 @@ export function handleVotingPeriodSet(event: VotingPeriodSetEvent): void {
     'VotingPeriodSet',
     event.transaction.from,
     event.params.oldVotingPeriod,
-    event.params.newVotingPeriod
+    event.params.newVotingPeriod,
+    event.block
   )
 }
 
@@ -139,6 +175,8 @@ export function handleVoteCast(event: VoteCastEvent): void {
   entity.weight = event.params.weight
   entity.reason = event.params.reason
   entity.proposal = Bytes.fromHexString(event.params.proposalId.toHexString())
+  entity.block = event.block.number
+  entity.createdAt = event.block.timestamp
   entity.save()
 }
 
@@ -153,5 +191,7 @@ export function handleVoteCastWithParams(event: VoteCastWithParamsEvent): void {
   entity.reason = event.params.reason
   entity.params = event.params.params
   entity.proposal = Bytes.fromHexString(event.params.proposalId.toHexString())
+  entity.block = event.block.number
+  entity.createdAt = event.block.timestamp
   entity.save()
 }

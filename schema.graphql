@@ -3,6 +3,8 @@ type Transfer @entity(immutable: true) {
   from: Member!
   to: Member!
   value: BigInt! # uint256
+  block: BigInt! # uint256
+  createdAt: BigInt! # uint256
 }
 
 # type MintAndApprove @entity {
@@ -13,10 +15,12 @@ type Transfer @entity(immutable: true) {
 
 type Member @entity {
   id: Bytes! # address
-  address: String! # address
   balance: BigInt! # uint256
   delegateBalance: BigInt! # uint256
   delegate: Bytes! # address
+  block: BigInt! # uint256
+  createdAt: BigInt! # uint256
+  updatedAt: BigInt! # uint256
 }
 
 type Proposal @entity {
@@ -33,6 +37,9 @@ type Proposal @entity {
   canceled: Boolean! # bool
   executed: Boolean! # bool
   voteCast: [VoteCast!]! @derivedFrom(field: "proposal")
+  block: BigInt! # uint256
+  createdAt: BigInt! # uint256
+  updatedAt: BigInt! # uint256
 }
 
 enum ProposalActivityType {
@@ -45,6 +52,8 @@ type ProposalActivity @entity {
   activity: ProposalActivityType!
   member: Member!
   proposal: Proposal!
+  block: BigInt! # uint256
+  createdAt: BigInt! # uint256
 }
 
 enum GovernorSettingActivityType {
@@ -59,6 +68,8 @@ type GovernorSettingActivity @entity {
   member: Member!
   oldValue: BigInt!
   newValue: BigInt!
+  block: BigInt! # uint256
+  createdAt: BigInt! # uint256
 }
 
 type VoteCast @entity {
@@ -70,4 +81,6 @@ type VoteCast @entity {
   reason: String! # string
   params: Bytes # bytes
   proposal: Proposal!
+  block: BigInt! # uint256
+  createdAt: BigInt! # uint256
 }

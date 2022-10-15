@@ -1,4 +1,4 @@
-import { Bytes } from '@graphprotocol/graph-ts'
+import { Address, Bytes, ethereum } from '@graphprotocol/graph-ts'
 import {
   Approval as ApprovalEvent,
   DelegateChanged as DelegateChangedEvent,
@@ -12,62 +12,66 @@ import {
   Member
 } from "../generated/schema"
 
-export function handleDelegateChanged(event: DelegateChangedEvent): void {
-  let tokenContract = TokenContract.bind(event.address)
-  const memberAddress = event.params.delegator
-  const memberId = Bytes.fromHexString(event.params.delegator.toHex())
+function loadOrCreate(contractAddress: Address, memberAddress: Address, block: ethereum.Block): Member {
+  const memberId = Bytes.fromHexString(memberAddress.toHex())
   let member = Member.load(memberId)
 
   if (!member) {
+    const tokenContract = TokenContract.bind(contractAddress)
     member = new Member(memberId)
-    member.address = memberAddress.toHex()
     member.balance = tokenContract.balanceOf(memberAddress)
     member.delegateBalance = tokenContract.getVotes(memberAddress)
+    member.delegate = tokenContract.delegates(memberAddress)
+    member.block = block.number
+    member.createdAt = block.timestamp
+    member.updatedAt = block.timestamp
   }
+  return member
+}
+
+export function handleDelegateChanged(event: DelegateChangedEvent): void {
+  const memberAddress = event.params.delegator
+  let member = loadOrCreate(event.address, memberAddress, event.block)
+
   member.delegate = event.params.toDelegate
+  member.updatedAt = event.block.timestamp
   member.save()
 }
 
 export function handleDelegateVotesChanged(
   event: DelegateVotesChangedEvent
 ): void {
-  let tokenContract = TokenContract.bind(event.address)
   const memberAddress = event.params.delegate
-  const memberId = Bytes.fromHexString(memberAddress.toHex())
-  let member = Member.load(memberId)
-
-  if (!member) {
-    member = new Member(memberId)
-    member.address = memberAddress.toHex()
-    member.balance = tokenContract.balanceOf(memberAddress)
-    member.delegate = tokenContract.delegates(memberAddress)
-  }
+  let member = loadOrCreate(event.address, memberAddress, event.block)
 
   member.delegateBalance = event.params.newBalance
+  member.updatedAt = event.block.timestamp
+  member.save()
+}
+
+
+function updateBalance(contractAddress: Address, memberAddress: Address, block: ethereum.Block): void {
+  let tokenContract = TokenContract.bind(contractAddress)
+
+  let member = loadOrCreate(contractAddress, memberAddress, block)
+
+  member.balance = tokenContract.balanceOf(memberAddress)
+  member.delegateBalance = tokenContract.getVotes(memberAddress)
+  member.updatedAt = block.timestamp
   member.save()
 }
 
 export function handleTransfer(event: TransferEvent): void {
+  updateBalance(event.address, event.params.to, event.block)
+  updateBalance(event.address, event.params.from, event.block)
+
   let entity = new Transfer(
     event.transaction.hash.toHex() + "-" + event.logIndex.toString()
   )
   entity.from = event.params.from
   entity.to = event.params.to
   entity.value = event.params.value
+  entity.block = event.block.number
+  entity.createdAt = event.block.timestamp
   entity.save()
-
-  let tokenContract = TokenContract.bind(event.address)
-  const memberAddress = event.params.to
-  const memberId = Bytes.fromHexString(memberAddress.toHex())
-
-  let member = Member.load(memberId)
-  if (!member) {
-    member = new Member(memberId)
-    member.address = memberAddress.toHex()
-    member.delegate = tokenContract.delegates(memberAddress)
-  }
-
-  member.balance = tokenContract.balanceOf(memberAddress)
-  member.delegateBalance = tokenContract.getVotes(memberAddress)
-  member.save()
 }
