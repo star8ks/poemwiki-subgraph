@@ -68,6 +68,7 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   proposal.block = event.block.number
   proposal.createdAt = event.block.timestamp
   proposal.updatedAt = event.block.timestamp
+  proposal.proposeTx = event.transaction.hash
   proposal.save()
 
   saveProposalActivity(
@@ -91,6 +92,9 @@ export function handleProposalCanceled(event: ProposalCanceledEvent): void {
   const proposal = Proposal.load(Bytes.fromHexString(event.params.proposalId.toHexString()))
   if (proposal) {
     proposal.canceled = true
+    proposal.cancelBlock = event.block.number
+    proposal.cancelTx = event.transaction.hash
+    proposal.cancelTime = event.block.timestamp
     proposal.updatedAt = event.block.timestamp
     proposal.save()
   } else {
@@ -111,6 +115,9 @@ export function handleProposalExecuted(event: ProposalExecutedEvent): void {
   if (proposal) {
     proposal.executed = true
     proposal.updatedAt = event.block.timestamp
+    proposal.executeBlock = event.block.number
+    proposal.executeTx = event.transaction.hash
+    proposal.executeTime = event.block.timestamp
     proposal.save()
   } else {
     log.error("ProposalCanceled event for unknown proposal {}", [event.params.proposalId.toHexString()])
@@ -177,6 +184,7 @@ export function handleVoteCast(event: VoteCastEvent): void {
   entity.proposal = Bytes.fromHexString(event.params.proposalId.toHexString())
   entity.block = event.block.number
   entity.createdAt = event.block.timestamp
+  entity.voteTx = event.transaction.hash
   entity.save()
 }
 
@@ -193,5 +201,6 @@ export function handleVoteCastWithParams(event: VoteCastWithParamsEvent): void {
   entity.proposal = Bytes.fromHexString(event.params.proposalId.toHexString())
   entity.block = event.block.number
   entity.createdAt = event.block.timestamp
+  entity.voteTx = event.transaction.hash
   entity.save()
 }

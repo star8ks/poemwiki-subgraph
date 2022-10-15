@@ -40,6 +40,13 @@ type Proposal @entity {
   block: BigInt! # uint256
   createdAt: BigInt! # uint256
   updatedAt: BigInt! # uint256
+  proposeTx: Bytes! # uint256
+  executeTx: Bytes # uint256
+  executeBlock: BigInt # uint256
+  executeTime: BigInt # uint256
+  cancelTx: Bytes # uint256
+  cancelBlock: BigInt # uint256
+  cancelTime: BigInt # uint256
 }
 
 enum ProposalActivityType {
@@ -83,4 +90,5 @@ type VoteCast @entity {
   proposal: Proposal!
   block: BigInt! # uint256
   createdAt: BigInt! # uint256
+  voteTx: Bytes! # uint256
 }

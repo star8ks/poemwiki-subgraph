@@ -339,6 +339,117 @@ export class Proposal extends Entity {
   set updatedAt(value: BigInt) {
     this.set("updatedAt", Value.fromBigInt(value));
   }
+
+  get proposeTx(): Bytes {
+    let value = this.get("proposeTx");
+    return value!.toBytes();
+  }
+
+  set proposeTx(value: Bytes) {
+    this.set("proposeTx", Value.fromBytes(value));
+  }
+
+  get executeTx(): Bytes | null {
+    let value = this.get("executeTx");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set executeTx(value: Bytes | null) {
+    if (!value) {
+      this.unset("executeTx");
+    } else {
+      this.set("executeTx", Value.fromBytes(<Bytes>value));
+    }
+  }
+
+  get executeBlock(): BigInt | null {
+    let value = this.get("executeBlock");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set executeBlock(value: BigInt | null) {
+    if (!value) {
+      this.unset("executeBlock");
+    } else {
+      this.set("executeBlock", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get executeTime(): BigInt | null {
+    let value = this.get("executeTime");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set executeTime(value: BigInt | null) {
+    if (!value) {
+      this.unset("executeTime");
+    } else {
+      this.set("executeTime", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get cancelTx(): Bytes | null {
+    let value = this.get("cancelTx");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set cancelTx(value: Bytes | null) {
+    if (!value) {
+      this.unset("cancelTx");
+    } else {
+      this.set("cancelTx", Value.fromBytes(<Bytes>value));
+    }
+  }
+
+  get cancelBlock(): BigInt | null {
+    let value = this.get("cancelBlock");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set cancelBlock(value: BigInt | null) {
+    if (!value) {
+      this.unset("cancelBlock");
+    } else {
+      this.set("cancelBlock", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get cancelTime(): BigInt | null {
+    let value = this.get("cancelTime");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set cancelTime(value: BigInt | null) {
+    if (!value) {
+      this.unset("cancelTime");
+    } else {
+      this.set("cancelTime", Value.fromBigInt(<BigInt>value));
+    }
+  }
 }
 
 export class ProposalActivity extends Entity {
@@ -629,5 +740,14 @@ export class VoteCast extends Entity {
 
   set createdAt(value: BigInt) {
     this.set("createdAt", Value.fromBigInt(value));
+  }
+
+  get voteTx(): Bytes {
+    let value = this.get("voteTx");
+    return value!.toBytes();
+  }
+
+  set voteTx(value: Bytes) {
+    this.set("voteTx", Value.fromBytes(value));
   }
 }

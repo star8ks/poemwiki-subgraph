@@ -8,11 +8,14 @@
     "create-local": "graph create --node http://localhost:8020/ poemwiki-dao",
     "remove-local": "graph remove --node http://localhost:8020/ poemwiki-dao",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 poemwiki-dao",
+    "deploy-hosted": "graph deploy --product hosted-service star8ks/poemwiki-dao",
     "test": "graph test"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.34.0",
     "@graphprotocol/graph-ts": "0.28.0"
   },
-  "devDependencies": { "matchstick-as": "0.5.0" }
+  "devDependencies": {
+    "matchstick-as": "0.5.0"
+  }
 }
