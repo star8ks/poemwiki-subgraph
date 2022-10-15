@@ -29,7 +29,7 @@ dataSources:
           handler: handleTransfer
         # - event: MintAndApprove(indexed address,uint256)
         #   handler: handleMintAndApprove
-      file: ./src/poem-wiki-token.ts
+      file: ./src/token.ts
   - kind: ethereum
     name: Governor
     network: goerli
