@@ -4,11 +4,11 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ poemwiki-dao",
-    "create-local": "graph create --node http://localhost:8020/ poemwiki-dao",
-    "remove-local": "graph remove --node http://localhost:8020/ poemwiki-dao",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 poemwiki-dao",
-    "deploy-hosted": "graph deploy --product hosted-service star8ks/poemwiki-dao",
+    "deploy": "graph deploy dao-amoy",
+    "create-local": "graph create --node http://localhost:8020/ dao-amoy",
+    "remove-local": "graph remove --node http://localhost:8020/ dao-amoy",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 dao-amoy",
+    "deploy-hosted": "graph deploy --product hosted-service star8ks/dao-amoy",
     "test": "graph test"
   },
   "dependencies": {
