@@ -86,6 +86,15 @@ export class Transfer extends Entity {
   set createdAt(value: BigInt) {
     this.set("createdAt", Value.fromBigInt(value));
   }
+
+  get tx(): Bytes {
+    let value = this.get("tx");
+    return value!.toBytes();
+  }
+
+  set tx(value: Bytes) {
+    this.set("tx", Value.fromBytes(value));
+  }
 }
 
 export class Member extends Entity {
@@ -304,13 +313,22 @@ export class Proposal extends Entity {
     this.set("executed", Value.fromBoolean(value));
   }
 
-  get voteCast(): Array<string> {
-    let value = this.get("voteCast");
+  get voteCasts(): Array<string> {
+    let value = this.get("voteCasts");
     return value!.toStringArray();
   }
 
-  set voteCast(value: Array<string>) {
-    this.set("voteCast", Value.fromStringArray(value));
+  set voteCasts(value: Array<string>) {
+    this.set("voteCasts", Value.fromStringArray(value));
+  }
+
+  get proposalActivities(): Array<string> {
+    let value = this.get("proposalActivities");
+    return value!.toStringArray();
+  }
+
+  set proposalActivities(value: Array<string>) {
+    this.set("proposalActivities", Value.fromStringArray(value));
   }
 
   get block(): BigInt {
@@ -742,12 +760,12 @@ export class VoteCast extends Entity {
     this.set("createdAt", Value.fromBigInt(value));
   }
 
-  get voteTx(): Bytes {
-    let value = this.get("voteTx");
-    return value!.toBytes();
+  get tx(): string {
+    let value = this.get("tx");
+    return value!.toString();
   }
 
-  set voteTx(value: Bytes) {
-    this.set("voteTx", Value.fromBytes(value));
+  set tx(value: string) {
+    this.set("tx", Value.fromString(value));
   }
 }

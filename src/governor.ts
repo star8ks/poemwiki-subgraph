@@ -184,7 +184,7 @@ export function handleVoteCast(event: VoteCastEvent): void {
   entity.proposal = Bytes.fromHexString(event.params.proposalId.toHexString())
   entity.block = event.block.number
   entity.createdAt = event.block.timestamp
-  entity.voteTx = event.transaction.hash
+  entity.tx = event.transaction.hash.toHex()
   entity.save()
 }
 
@@ -201,6 +201,6 @@ export function handleVoteCastWithParams(event: VoteCastWithParamsEvent): void {
   entity.proposal = Bytes.fromHexString(event.params.proposalId.toHexString())
   entity.block = event.block.number
   entity.createdAt = event.block.timestamp
-  entity.voteTx = event.transaction.hash
+  entity.tx = event.transaction.hash.toHex()
   entity.save()
 }
