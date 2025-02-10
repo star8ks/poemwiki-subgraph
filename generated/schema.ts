@@ -547,6 +547,15 @@ export class ProposalActivity extends Entity {
   set createdAt(value: BigInt) {
     this.set("createdAt", Value.fromBigInt(value));
   }
+
+  get tx(): string {
+    let value = this.get("tx");
+    return value!.toString();
+  }
+
+  set tx(value: string) {
+    this.set("tx", Value.fromString(value));
+  }
 }
 
 export class GovernorSettingActivity extends Entity {
@@ -637,6 +646,15 @@ export class GovernorSettingActivity extends Entity {
 
   set createdAt(value: BigInt) {
     this.set("createdAt", Value.fromBigInt(value));
+  }
+
+  get tx(): string {
+    let value = this.get("tx");
+    return value!.toString();
+  }
+
+  set tx(value: string) {
+    this.set("tx", Value.fromString(value));
   }
 }
 

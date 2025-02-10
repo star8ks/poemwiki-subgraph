@@ -40,7 +40,7 @@ function saveProposalActivity(id: string, activityType: string,
 //   VotingPeriodSet: 'VotingPeriodSet'
 // }
 function saveGovernorActivity(id: string, activityType: string, member: Bytes,
-  oldValue: BigInt, newValue: BigInt, block: ethereum.Block): void {
+  oldValue: BigInt, newValue: BigInt, block: ethereum.Block, tx: Bytes): void {
   let activity = new GovernorSettingActivity(id)
   activity.activity = activityType
   activity.member = member
@@ -48,6 +48,7 @@ function saveGovernorActivity(id: string, activityType: string, member: Bytes,
   activity.newValue = newValue
   activity.block = block.number
   activity.createdAt = block.timestamp
+  activity.tx = tx.toHex()
   activity.save()
 }
 
@@ -133,7 +134,8 @@ export function handleProposalThresholdSet(
     event.transaction.from,
     event.params.oldProposalThreshold,
     event.params.newProposalThreshold,
-    event.block
+    event.block,
+    event.transaction.hash
   )
 }
 
@@ -146,7 +148,8 @@ export function handleQuorumNumeratorUpdated(
     event.transaction.from,
     event.params.oldQuorumNumerator,
     event.params.newQuorumNumerator,
-    event.block
+    event.block,
+    event.transaction.hash
   )
 }
 
@@ -157,7 +160,8 @@ export function handleVotingDelaySet(event: VotingDelaySetEvent): void {
     event.transaction.from,
     event.params.oldVotingDelay,
     event.params.newVotingDelay,
-    event.block
+    event.block,
+    event.transaction.hash
   )
 }
 
@@ -168,7 +172,8 @@ export function handleVotingPeriodSet(event: VotingPeriodSetEvent): void {
     event.transaction.from,
     event.params.oldVotingPeriod,
     event.params.newVotingPeriod,
-    event.block
+    event.block,
+    event.transaction.hash
   )
 }
 
