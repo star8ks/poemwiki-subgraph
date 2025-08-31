@@ -23,13 +23,14 @@ import {
 //   EXECUTE: 'EXECUTE'
 // }
 function saveProposalActivity(id: string, activityType: string,
-  proposalId: BigInt, member: Bytes, block: ethereum.Block): void {
+  proposalId: BigInt, member: Bytes, block: ethereum.Block, tx: Bytes): void {
   let activity = new ProposalActivity(id)
   activity.proposal = Bytes.fromHexString(proposalId.toHexString())
   activity.activity = activityType
   activity.member = member
   activity.block = block.number
   activity.createdAt = block.timestamp
+  activity.tx = tx.toHex()
   activity.save()
 }
 
@@ -77,7 +78,8 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
     'CREATE',
     event.params.proposalId,
     event.transaction.from,
-    event.block
+    event.block,
+    event.transaction.hash
   )
 }
 
@@ -87,7 +89,8 @@ export function handleProposalCanceled(event: ProposalCanceledEvent): void {
     'CANCEL',
     event.params.proposalId,
     event.transaction.from,
-    event.block
+    event.block,
+    event.transaction.hash
   )
 
   const proposal = Proposal.load(Bytes.fromHexString(event.params.proposalId.toHexString()))
@@ -109,7 +112,8 @@ export function handleProposalExecuted(event: ProposalExecutedEvent): void {
     'EXECUTE',
     event.params.proposalId,
     event.transaction.from,
-    event.block
+    event.block,
+    event.transaction.hash
   )
 
   const proposal = Proposal.load(Bytes.fromHexString(event.params.proposalId.toHexString()))

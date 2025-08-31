@@ -1,14 +1,16 @@
-specVersion: 0.0.4
+specVersion: 1.0.0
 schema:
   file: ./schema.graphql
+indexerHints:
+  prune: auto
 dataSources:
   - kind: ethereum
     name: PoemWikiToken
-    network: polygon-amoy
+    network: matic
     source:
-      address: "0x8650Ce5eB77DD43629c9EAaf461F339A4FC90402"
+      address: "0x023D7505B15f15e1D33b77C171F870fD5445F35A"
       abi: PoemWikiToken
-      startBlock: 7638840
+      startBlock: 33415370
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -32,11 +34,11 @@ dataSources:
       file: ./src/token.ts
   - kind: ethereum
     name: Governor
-    network: polygon-amoy
+    network: matic
     source:
-      address: "0x384CE091068508d72d12C982B0eFf51A4857AA73"
+      address: "0x8650Ce5eB77DD43629c9EAaf461F339A4FC90402"
       abi: Governor
-      startBlock: 7638842
+      startBlock: 33415379
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

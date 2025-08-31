@@ -7,6 +7,12 @@ PoemWiki DAO reputation token and governor subgraph.
 - **PoemWiki DAO**: This project involves a subgraph for the PoemWiki DAO, which includes a reputation token and a governor.
 - **Network**: The subgraph is deployed on the Goerli test network.
 
+## Initialize and Deploy
+pnpm add -g @graphprotocol/graph-cli
+graph auth xxxxxxxxxxx
+graph build
+graph deploy subgraph-name
+
 ## Key Components
 
 - **Entities**: 
