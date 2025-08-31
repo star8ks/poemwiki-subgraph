@@ -25,7 +25,8 @@ import {
 function saveProposalActivity(id: string, activityType: string,
   proposalId: BigInt, member: Bytes, block: ethereum.Block, tx: Bytes): void {
   let activity = new ProposalActivity(id)
-  activity.proposal = Bytes.fromHexString(proposalId.toHexString())
+  // Convert BigInt to Bytes via safe helper (pads odd-length hex)
+  activity.proposal = bigIntToBytes(proposalId)
   activity.activity = activityType
   activity.member = member
   activity.block = block.number
@@ -54,7 +55,8 @@ function saveGovernorActivity(id: string, activityType: string, member: Bytes,
 }
 
 export function handleProposalCreated(event: ProposalCreatedEvent): void {
-  const id = Bytes.fromHexString(event.params.proposalId.toHexString())
+  // Convert proposalId via helper to ensure even-length hex
+  const id = bigIntToBytes(event.params.proposalId)
   let proposal = new Proposal(id)
   proposal.proposalId = event.params.proposalId
   proposal.proposer = event.params.proposer
@@ -93,7 +95,7 @@ export function handleProposalCanceled(event: ProposalCanceledEvent): void {
     event.transaction.hash
   )
 
-  const proposal = Proposal.load(Bytes.fromHexString(event.params.proposalId.toHexString()))
+  const proposal = Proposal.load(bigIntToBytes(event.params.proposalId))
   if (proposal) {
     proposal.canceled = true
     proposal.cancelBlock = event.block.number
@@ -116,7 +118,7 @@ export function handleProposalExecuted(event: ProposalExecutedEvent): void {
     event.transaction.hash
   )
 
-  const proposal = Proposal.load(Bytes.fromHexString(event.params.proposalId.toHexString()))
+  const proposal = Proposal.load(bigIntToBytes(event.params.proposalId))
   if (proposal) {
     proposal.executed = true
     proposal.updatedAt = event.block.timestamp
@@ -190,7 +192,7 @@ export function handleVoteCast(event: VoteCastEvent): void {
   entity.support = event.params.support
   entity.weight = event.params.weight
   entity.reason = event.params.reason
-  entity.proposal = Bytes.fromHexString(event.params.proposalId.toHexString())
+  entity.proposal = bigIntToBytes(event.params.proposalId)
   entity.block = event.block.number
   entity.createdAt = event.block.timestamp
   entity.tx = event.transaction.hash.toHex()
@@ -207,9 +209,19 @@ export function handleVoteCastWithParams(event: VoteCastWithParamsEvent): void {
   entity.weight = event.params.weight
   entity.reason = event.params.reason
   entity.params = event.params.params
-  entity.proposal = Bytes.fromHexString(event.params.proposalId.toHexString())
+  entity.proposal = bigIntToBytes(event.params.proposalId)
   entity.block = event.block.number
   entity.createdAt = event.block.timestamp
   entity.tx = event.transaction.hash.toHex()
   entity.save()
+}
+
+// Helper: Converts a BigInt to Bytes ensuring the hex string has even length (Graph Bytes.fromHexString requires even length)
+function bigIntToBytes(value: BigInt): Bytes {
+  let hex = value.toHexString() // e.g. 0xabc
+  let content = hex.slice(2)
+  if (content.length % 2 == 1) {
+    content = '0' + content
+  }
+  return Bytes.fromHexString('0x' + content)
 }
